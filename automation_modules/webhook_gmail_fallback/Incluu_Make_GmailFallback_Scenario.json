@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "name": "Incluu - Gmail Fallback Webhook",
+    "version": "1.0"
+  },
+  "scenario": {
+    "modules": [
+      {
+        "id": 1,
+        "module": "gmail:watchEmails",
+        "name": "Watch Podia Emails",
+        "params": {
+          "filterType": "simple",
+          "criteria": "*@epodia.com",
+          "readStatus": "unread",
+          "maxResults": 1
+        }
+      },
+      {
+        "id": 2,
+        "module": "airtable:createRecord",
+        "name": "Create Airtable Record",
+        "params": {
+          "baseId": "appExampleID",
+          "tableId": "tblExampleID",
+          "fields": {
+            "Sender": "{{1.from}}",
+            "Subject": "{{1.subject}}",
+            "Body": "{{1.snippet}}",
+            "Date": "{{1.date}}"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "module": "slack:createMessage",
+        "name": "Notify Slack",
+        "params": {
+          "channel": "#sales-alerts",
+          "text": "🚨 New Podia Sale!
+From: {{1.from}}
+Subject: {{1.subject}}
+Date: {{1.date}}"
+        }
+      }
+    ],
+    "connections": [
+      {"from": 1, "to": 2},
+      {"from": 2, "to": 3}
+    ]
+  }
+}
